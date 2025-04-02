@@ -29,8 +29,8 @@ function createWindow() {
   const win = new BrowserWindow({
     width: 600,
     height: 700,
-    frame: false,
-    titleBarStyle: "hiddenInset",
+    frame: isWindows ? true : false,
+    titleBarStyle: isWindows ? undefined : "hiddenInset",
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
