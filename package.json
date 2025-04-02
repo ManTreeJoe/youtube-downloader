@@ -9,7 +9,8 @@
   "scripts": {
     "start": "electron .",
     "package-mac": "electron-packager . 'YouTube Downloader' --platform=darwin --arch=arm64 --icon=icon.icns --overwrite --extra-resource=tools --out=dist",
-    "build:win": "electron-packager . 'YouTube Downloader' --platform=win32 --arch=x64 --icon=icon.ico --overwrite --extra-resource=tools --out=dist"
+    "build:win": "electron-packager . 'YouTube Downloader' --platform=win32 --arch=x64 --icon=icon.ico --overwrite --extra-resource=tools --out=dist",
+    "dmg": "electron-installer-dmg 'dist/YouTube Downloader-darwin-arm64/YouTube Downloader.app' 'YouTube Downloader' --out=dist --overwrite --icon=icon.icns"
   },
   "dependencies": {
     "dotenv": "^16.4.7",
@@ -18,6 +19,7 @@
   "devDependencies": {
     "electron": "^27.1.0",
     "electron-builder": "^26.0.12",
+    "electron-installer-dmg": "^5.0.1",
     "electron-packager": "^17.1.1"
   },
   "build": {
