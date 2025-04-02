@@ -1,0 +1,50 @@
+{
+  "name": "youtube-downloader",
+  "productName": "YouTube Downloader",
+  "version": "1.0.0",
+  "description": "A desktop app to download YouTube videos and audio using Electron and yt-dlp.",
+  "main": "main.js",
+  "author": "Joe Treeman",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-builder",
+    "package-mac": "electron-packager . 'YouTube Downloader' --platform=darwin --arch=x64 --icon=icon.icns --overwrite --extra-resource=tools"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "youtube-dl-exec": "^3.0.20"
+  },
+  "devDependencies": {
+    "electron": "^27.1.0",
+    "electron-builder": "^26.0.12",
+    "electron-packager": "^17.1.1"
+  },
+  "build": {
+    "appId": "com.yourdomain.youtube-downloader",
+    "asar": true,
+    "files": [
+      "**/*"
+    ],
+    "extraResources": [
+      {
+        "from": "tools",
+        "to": "tools",
+        "filter": [
+          "**/*"
+        ]
+      }
+    ],
+    "mac": {
+      "target": "dmg",
+      "icon": "icon.icns"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "icon.ico"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
+  }
+}

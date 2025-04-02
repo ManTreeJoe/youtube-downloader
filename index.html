@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>YouTube Downloader</title>
+
+    <style>
+      :root {
+        --bg-color: #121212;
+        --card-bg: #1e1e1e;
+        --accent: #5a5ff8;
+        --text-color: #f0f0f0;
+        --border-color: #333;
+        --input-bg: #2a2a2a;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: "Segoe UI", sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        height: 100vh;
+        width: 100vw;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      #container {
+        position: relative;
+        width: 100%;
+        max-width: 500px;
+        padding: 40px 24px;
+        top: -50px; /* 👈 space for title bar */
+        text-align: center;
+      }
+
+      .title-bar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 32px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        -webkit-app-region: drag;
+        z-index: 1000;
+      }
+
+      .title-text {
+        font-weight: 600;
+        color: white;
+        font-size: 14px;
+        pointer-events: none;
+      }
+
+      h1 {
+        font-size: 28px;
+        margin-bottom: 24px;
+        font-weight: 500;
+        color: white;
+      }
+
+      .input-bar {
+        display: flex;
+        align-items: center;
+        background-color: var(--input-bg);
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+        margin-bottom: 20px;
+        height: 48px;
+      }
+
+      .input-bar input {
+        flex: 1;
+        padding: 12px 16px;
+        font-size: 14px;
+        background-color: transparent;
+        border: none;
+        color: var(--text-color);
+        outline: none;
+      }
+
+      .input-bar select {
+        padding: 0 16px;
+        height: 100%;
+        border: none;
+        background-color: var(--card-bg);
+        color: var(--text-color);
+        font-size: 14px;
+        border-left: 1px solid var(--border-color);
+        outline: none;
+        cursor: pointer;
+        appearance: none;
+      }
+
+      #audio-track:focus {
+        border: 1px solid var(--accent);
+        outline: none;
+      }
+
+      button {
+        width: 100%;
+        padding: 12px;
+        border-radius: 10px;
+        border: 1px solid var(--accent);
+        background-color: transparent;
+        color: var(--accent);
+        font-size: 14px;
+        cursor: pointer;
+        transition: background-color 0.2s ease, color 0.2s ease;
+      }
+
+      button:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+
+      button:hover:enabled {
+        background-color: var(--accent);
+        color: #fff;
+      }
+
+      .hamburger {
+        position: fixed;
+        top: 25px;
+        left: 16px;
+        font-size: 24px;
+        color: white;
+        z-index: 2001;
+        cursor: pointer;
+        -webkit-app-region: no-drag;
+      }
+
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: -260px;
+        width: 240px;
+        height: 100%;
+        background-color: #1e1f29;
+        padding: 60px 20px 20px;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
+        transition: left 0.3s ease;
+        z-index: 2000;
+        overflow-y: auto;
+      }
+
+      .sidebar.open {
+        left: 0;
+      }
+
+      .sidebar h2 {
+        color: white;
+        margin-bottom: 12px;
+      }
+
+      #history-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        color: #ccc;
+      }
+
+      #history-list li {
+        margin-bottom: 8px;
+        font-size: 14px;
+        word-break: break-word;
+      }
+
+      .spinner {
+        border: 4px solid #2a2a2a;
+        border-top: 4px solid var(--accent);
+        border-radius: 50%;
+        width: 32px;
+        height: 32px;
+        animation: spin 0.8s linear infinite;
+        margin: 20px auto 0;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="title-bar">
+      <span class="title-text">YouTube Downloader</span>
+    </div>
+
+    <div class="sidebar" id="sidebar">
+      <h2>Downloads</h2>
+      <button
+        onclick="clearCache()"
+        style="
+          margin-bottom: 16px;
+          width: 100%;
+          padding: 8px;
+          background-color: #2a2a2a;
+          color: #eee;
+          border: 1px solid #444;
+          border-radius: 8px;
+          cursor: pointer;
+        "
+      >
+        🗑 Clear Downloads
+      </button>
+
+      <ul id="history-list"></ul>
+    </div>
+
+    <div class="hamburger" onclick="toggleSidebar()">☰</div>
+
+    <div id="container">
+      <h1>YouTube Downloader</h1>
+
+      <div class="input-bar">
+        <input
+          id="url"
+          type="text"
+          placeholder="Paste YouTube link here"
+          onblur="previewVideo()"
+          onchange="previewVideo()"
+          onkeyup="if(event.key==='Enter') previewVideo()"
+        />
+
+        <select id="format">
+          <option value="mp3">MP3</option>
+          <option value="mp4">MP4</option>
+        </select>
+      </div>
+
+      <div id="audio-track-section" style="display: none; margin-top: 16px">
+        <label
+          for="audio-track"
+          style="
+            display: block;
+            margin-bottom: 4px;
+            font-size: 14px;
+            color: #ccc;
+          "
+        >
+          Choose Audio Track:
+        </label>
+        <select
+          id="audio-track"
+          style="
+            margin-bottom: 10px;
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            background-color: #2a2a2a;
+            color: white;
+            border: 1px solid #444;
+          "
+        >
+          <!-- Options will be added dynamically -->
+        </select>
+      </div>
+
+      <button id="download-btn" onclick="download()" disabled>Download</button>
+
+      <div id="loading-spinner" class="spinner" style="display: none"></div>
+
+      <div id="video-preview" style="display: none; margin-top: 20px">
+        <img
+          id="video-thumbnail"
+          src=""
+          alt="Thumbnail"
+          style="width: 100%; border-radius: 10px"
+        />
+        <p
+          id="video-title"
+          style="margin-top: 8px; font-size: 14px; color: #ccc"
+        ></p>
+      </div>
+    </div>
+
+    <script>
+      let downloadHistory = [];
+      let lastThumbnail = "";
+
+      function loadHistory() {
+        window.yt.loadHistory().then((history) => {
+          if (Array.isArray(history)) {
+            downloadHistory = history;
+            history.forEach((entry) => {
+              renderHistoryItem(
+                entry.filename,
+                entry.thumbnail,
+                entry.fullPath
+              );
+            });
+          }
+        });
+      }
+
+      function toggleSidebar() {
+        const sidebar = document.getElementById("sidebar");
+        sidebar.classList.toggle("open");
+      }
+
+      function renderHistoryItem(filename, thumbnailUrl, fullPath) {
+        const list = document.getElementById("history-list");
+        const li = document.createElement("li");
+
+        li.innerHTML = `
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <img src="${thumbnailUrl}" style="width: 80px; height: 40px; border-radius: 4px; object-fit: cover;" />
+            <span style="font-size: 14px; color: #5a5ff8; word-break: break-all;">${filename}</span>
+          </div>
+        `;
+
+        list.prepend(li);
+      }
+
+      function addToHistory(filename, thumbnailUrl, fullPath) {
+        const exists = downloadHistory.some(
+          (entry) => entry.filename === filename && entry.fullPath === fullPath
+        );
+        if (exists) return;
+
+        downloadHistory.push({ filename, thumbnail: thumbnailUrl, fullPath });
+        renderHistoryItem(filename, thumbnailUrl, fullPath);
+        window.yt.saveHistory(downloadHistory);
+      }
+
+      function download() {
+        const url = document.getElementById("url").value;
+        const format = document.getElementById("format").value;
+        const audioTrack = document.getElementById("audio-track")?.value;
+
+        if (!url) return;
+
+        document.getElementById("loading-spinner").style.display = "block";
+
+        window.yt
+          .downloadVideo({ url, format, audioTrack })
+          .then((result) => {
+            if (result?.filename && result?.fullPath) {
+              addToHistory(result.filename, lastThumbnail, result.fullPath);
+
+              // Reset UI
+              document.getElementById("url").value = "";
+              document.getElementById("audio-track").innerHTML = "";
+              document.getElementById("video-preview").style.display = "none";
+              document.getElementById("audio-track-section").style.display =
+                "none";
+              document.getElementById("download-btn").disabled = true;
+            }
+          })
+          .catch((err) => {
+            console.error("Download failed:", err);
+          })
+          .finally(() => {
+            document.getElementById("loading-spinner").style.display = "none";
+          });
+      }
+
+      function previewVideo() {
+        const url = document.getElementById("url").value;
+        if (!url) return;
+
+        document.getElementById("video-preview").style.display = "none";
+        document.getElementById("audio-track-section").style.display = "none";
+        document.getElementById("download-btn").disabled = true;
+
+        window.yt.getVideoInfo(url).then((info) => {
+          if (!info) {
+            alert("Could not fetch video info. Check the URL.");
+            return;
+          }
+
+          lastThumbnail = info.thumbnail;
+
+          const preview = document.getElementById("video-preview");
+          const thumbnail = document.getElementById("video-thumbnail");
+          const title = document.getElementById("video-title");
+
+          thumbnail.src = info.thumbnail;
+          title.textContent = info.title;
+          preview.style.display = "block";
+
+          const audioSection = document.getElementById("audio-track-section");
+          const audioSelect = document.getElementById("audio-track");
+          audioSelect.innerHTML = "";
+
+          if (info.audioTracks?.length > 0) {
+            info.audioTracks.forEach((track) => {
+              const option = document.createElement("option");
+              option.value = track.format_id;
+              option.textContent = track.label;
+              audioSelect.appendChild(option);
+            });
+
+            audioSection.style.display = "block";
+          }
+
+          document.getElementById("download-btn").disabled = false;
+        });
+      }
+
+      function clearCache() {
+        window.yt.clearHistory().then((success) => {
+          if (success) {
+            downloadHistory = [];
+            document.getElementById("history-list").innerHTML = "";
+          } else {
+            alert("Failed to clear download history.");
+          }
+        });
+      }
+
+      document.addEventListener("click", (e) => {
+        const sidebar = document.getElementById("sidebar");
+        const hamburger = document.querySelector(".hamburger");
+
+        const clickedInsideSidebar = sidebar.contains(e.target);
+        const clickedHamburger = hamburger.contains(e.target);
+
+        if (
+          sidebar.classList.contains("open") &&
+          !clickedInsideSidebar &&
+          !clickedHamburger
+        ) {
+          sidebar.classList.remove("open");
+        }
+      });
+
+      loadHistory();
+    </script>
+  </body>
+</html>
