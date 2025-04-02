@@ -1,0 +1,15 @@
+# Ignore build artifacts
+/dist
+*.dmg
+*.exe
+*.app
+
+# Ignore platform-specific binaries
+/tools/yt-dlp*
+/tools/ffmpeg*
+/tools/yt-dlp*
+/tools/ffmpeg.exe*
+/tools/yt-dlp.exe*
+
+# macOS clutter
+.DS_Store

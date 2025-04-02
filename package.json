@@ -8,8 +8,8 @@
   "license": "MIT",
   "scripts": {
     "start": "electron .",
-    "build": "electron-builder",
-    "package-mac": "electron-packager . 'YouTube Downloader' --platform=darwin --arch=x64 --icon=icon.icns --overwrite --extra-resource=tools"
+    "package-mac": "electron-packager . 'YouTube Downloader' --platform=darwin --arch=arm64 --icon=icon.icns --overwrite --extra-resource=tools --out=dist",
+    "build:win": "electron-packager . 'YouTube Downloader' --platform=win32 --arch=x64 --icon=icon.ico --overwrite --extra-resource=tools --out=dist"
   },
   "dependencies": {
     "dotenv": "^16.4.7",
