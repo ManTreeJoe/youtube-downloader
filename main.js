@@ -213,3 +213,21 @@ ipcMain.handle("clear-history", () => {
     return false;
   }
 });
+
+if (process.platform === "darwin") {
+  app.on("activate", () => {
+    if (BrowserWindow.getAllWindows().length === 0) {
+      createWindow();
+    }
+  });
+
+  app.on("window-all-closed", () => {
+    // Don't quit on macOS when all windows are closed
+    // App remains in the dock until Cmd+Q or app.quit()
+  });
+} else {
+  // On Windows/Linux: Quit when all windows are closed
+  app.on("window-all-closed", () => {
+    app.quit();
+  });
+}
