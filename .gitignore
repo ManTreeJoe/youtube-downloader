@@ -4,12 +4,9 @@
 *.exe
 *.app
 
-# Ignore platform-specific binaries
-/tools/yt-dlp*
-/tools/ffmpeg*
-/tools/yt-dlp*
-/tools/ffmpeg.exe*
-/tools/yt-dlp.exe*
+# Keep tools/ folder, but ignore its contents
+/tools/*
+!/tools/.gitkeep
 
 # macOS clutter
 .DS_Store
